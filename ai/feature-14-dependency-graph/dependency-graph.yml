@@ -1,0 +1,26 @@
+name: Dependency Graph
+on:
+  schedule:
+    - cron: "30 6 * * 5"
+  workflow_dispatch: {}
+jobs:
+  graph:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml requests anthropic
+      - name: Generate dependency map
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python ai/feature-14-dependency-graph/dependency-graph.py
+      - name: Commit changes
+        run: |
+          git config user.name "program-hub-bot"
+          git config user.email "program-hub-bot@users.noreply.github.com"
+          git add program/DEPENDENCY-MAP.md
+          git diff --cached --quiet || git commit -m "chore: update dependency map"
+          git push

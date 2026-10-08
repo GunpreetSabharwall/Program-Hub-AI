@@ -1,0 +1,19 @@
+name: PM Briefing
+on:
+  schedule:
+    - cron: "30 8 * * 1"
+  workflow_dispatch: {}
+jobs:
+  briefing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install anthropic requests
+      - name: Post PM briefing to Slack
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python ai/feature-21-pm-briefing/pm-briefing.py

@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+"""Interactive CLI to onboard a new initiative into Program Hub."""
+
+import os
+import re
+import sys
+import subprocess
+from datetime import datetime, date
+from pathlib import Path
+
+import yaml
+import requests
+
+ROOT = Path(__file__).parent.parent
+
+
+def gh_headers(token: str) -> dict:
+    return {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
+
+
+def slugify(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def prompt(msg: str, default: str = "") -> str:
+    if default:
+        val = input(f"{msg} [{default}]: ").strip()
+        return val if val else default
+    val = input(f"{msg}: ").strip()
+    while not val:
+        val = input(f"  (required) {msg}: ").strip()
+    return val
+
+
+def create_label(token: str, repo: str, label: str, color: str = "d93f0b") -> None:
+    resp = requests.post(
+        f"https://api.github.com/repos/{repo}/labels",
+        headers=gh_headers(token),
+        json={"name": label, "color": color},
+    )
+    if resp.status_code == 422:
+        print(f"  Label '{label}' already exists in {repo} — skipping.")
+    else:
+        resp.raise_for_status()
+        print(f"  Created label '{label}' in {repo}.")
+
+
+def add_to_workflow_matrix(slug: str) -> None:
+    """Append initiative slug to all workflow matrix lists."""
+    workflow_dir = ROOT / ".github" / "workflows"
+    for wf_file in workflow_dir.glob("*.yml"):
+        text = wf_file.read_text()
+        # Find matrix initiative lists and append if not present
+        if "matrix:" in text and "initiative:" in text and slug not in text:
+            # Insert new slug after the last initiative entry
+            updated = re.sub(
+                r"(        initiative:\n(?:          - [^\n]+\n)+)",
+                lambda m: m.group(0) + f"          - {slug}\n",
+                text,
+            )
+            if updated != text:
+                wf_file.write_text(updated)
+                print(f"  Added '{slug}' to {wf_file.name} matrix.")
+
+
+def update_initiative_registry(slug: str, name: str, owner: str, source_repo: str, showcase_date: str) -> None:
+    registry_path = ROOT / "INITIATIVE-REGISTRY.md"
+    text = registry_path.read_text()
+    new_row = f"| {slug} | {name} | {owner} | active | {source_repo} | {showcase_date} |"
+    # Insert before the trailing separator line
+    text = text.replace(
+        "\n---\n",
+        f"\n{new_row}\n\n---\n",
+        1,
+    )
+    registry_path.write_text(text)
+    print("  Updated INITIATIVE-REGISTRY.md.")
+
+
+def main() -> None:
+    token = os.environ.get("OCTO_PAT") or os.environ.get("GITHUB_TOKEN") or ""
+    if not token:
+        token = input("GitHub token (OCTO_PAT): ").strip()
+    if not token:
+        sys.exit("Error: GitHub token required.")
+
+    print("\n=== Program Hub Initiative Onboarding ===\n")
+
+    name = prompt("Initiative name (human readable)")
+    slug = prompt("Slug (kebab-case)", slugify(name))
+    source_repo = prompt("Source repository (owner/repo)")
+    owner = prompt("Initiative owner (GitHub handle, e.g. @alice)")
+    week_start = prompt("Sprint start date (YYYY-MM-DD)", str(date.today()))
+    duration_weeks = int(prompt("Duration in weeks", "8"))
+    showcase_date_str = prompt("Showcase date (YYYY-MM-DD)")
+
+    # Collect pods
+    pods = []
+    print("\nDefine pods (press Enter with empty name to finish):")
+    while True:
+        pod_name = input("  Pod name (or Enter to finish): ").strip()
+        if not pod_name:
+            break
+        pod_slug = slugify(pod_name)
+        pod_label = prompt(f"  Label for '{pod_name}'", f"{slug}-{pod_slug}")
+        pods.append({"slug": pod_slug, "label": pod_label, "name": pod_name})
+
+    if not pods:
+        pods = [{"slug": "pod1", "label": f"{slug}-pod1", "name": "Pod 1"}]
+        print(f"  No pods entered — defaulting to one pod: {pods[0]['name']}")
+
+    # Build config
+    config = {
+        "name": name,
+        "slug": slug,
+        "source_repo": source_repo,
+        "source_repo_url": f"https://github.com/{source_repo}",
+        "owner": owner,
+        "status": "active",
+        "week_start": week_start,
+        "duration_weeks": duration_weeks,
+        "showcase_date": showcase_date_str,
+        "github_project_id": "",
+        "labels": {"blocked": "blocked", "dependency": "dependency", "adr": "adr-required"},
+        "sync_cadence": "weekly",
+        "pods": pods,
+    }
+
+    # Create directory structure
+    print(f"\nCreating files for '{slug}'...")
+    init_dir = ROOT / "initiatives" / slug
+    init_dir.mkdir(parents=True, exist_ok=True)
+
+    # config.yml
+    config_path = init_dir / "config.yml"
+    config_path.write_text(yaml.dump(config, default_flow_style=False, sort_keys=False))
+    print(f"  Created {config_path.relative_to(ROOT)}")
+
+    # STATUS.md
+    status_path = init_dir / "STATUS.md"
+    status_path.write_text(
+        f"<!-- AUTO-REGENERATED by scripts/update-status.py -->\n\n"
+        f"# Status — {name}\n\n"
+        f"*Run initiative-sync workflow to populate this file.*\n"
+    )
+    print(f"  Created {status_path.relative_to(ROOT)}")
+
+    # RISK-REGISTER.md
+    risk_path = init_dir / "RISK-REGISTER.md"
+    risk_path.write_text(
+        f"<!-- AUTO-REGENERATED by scripts/update-risk-register.py -->\n\n"
+        f"# Risk Register — {name}\n\n"
+        f"| Risk ID | Title | Label | Days Open | Assignee | Date Flagged | Issue |\n"
+        f"|---------|-------|-------|-----------|----------|--------------|-------|\n\n"
+        f"*No risks flagged yet.*\n"
+    )
+    print(f"  Created {risk_path.relative_to(ROOT)}")
+
+    # DECISION-LOG.md
+    decision_path = init_dir / "DECISION-LOG.md"
+    decision_path.write_text(
+        f"# Decision Log — {name}\n\n"
+        f"| ADR | Title | Date | Status | Link |\n"
+        f"|-----|-------|------|--------|------|\n\n"
+        f"*No decisions recorded yet.*\n"
+    )
+    print(f"  Created {decision_path.relative_to(ROOT)}")
+
+    # Pod directories and STANDUP.md files
+    pods_dir = init_dir / "pods"
+    for pod in pods:
+        pod_dir = pods_dir / pod["slug"]
+        pod_dir.mkdir(parents=True, exist_ok=True)
+        standup_path = pod_dir / "STANDUP.md"
+        standup_path.write_text(
+            f"<!-- AUTO-REGENERATED by scripts/update-pod-standups.py -->\n\n"
+            f"# Standup — {pod['name']}\n\n"
+            f"*Run standup-update workflow to populate this file.*\n"
+        )
+        print(f"  Created {standup_path.relative_to(ROOT)}")
+
+    # Create labels in source repo
+    print(f"\nCreating labels in {source_repo}...")
+    create_label(token, source_repo, "blocked", "d93f0b")
+    create_label(token, source_repo, "dependency", "0075ca")
+    create_label(token, source_repo, "adr-required", "e4e669")
+    for pod in pods:
+        create_label(token, source_repo, pod["label"], "5319e7")
+
+    # Update workflow matrices
+    print("\nUpdating workflow matrices...")
+    add_to_workflow_matrix(slug)
+
+    # Update initiative registry
+    print("\nUpdating INITIATIVE-REGISTRY.md...")
+    update_initiative_registry(slug, name, owner, source_repo, showcase_date_str)
+
+    # Run setup-project-board.py
+    owner_login = source_repo.split("/")[0]
+    print(f"\nSetting up GitHub Project board for {owner_login}...")
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "setup-project-board.py"),
+         owner_login, f"{name} Program Board"],
+        env={**os.environ, "OCTO_PAT": token},
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        # Extract project ID from output if present
+        for line in result.stdout.splitlines():
+            if line.startswith("PROJECT_ID:"):
+                project_id = line.split(":", 1)[1].strip()
+                config["github_project_id"] = project_id
+                config_path.write_text(yaml.dump(config, default_flow_style=False, sort_keys=False))
+                print(f"  Project board created with ID {project_id}.")
+        print(result.stdout.strip())
+    else:
+        print(f"  Warning: setup-project-board.py failed: {result.stderr.strip()}")
+
+    print(f"\n✓ Initiative '{name}' ({slug}) onboarded successfully.")
+    print(f"\nNext steps:")
+    print(f"  1. Review initiatives/{slug}/config.yml and adjust if needed.")
+    print(f"  2. git add -A && git commit -m 'feat: onboard {slug}'")
+    print(f"  3. git push")
+    print(f"  4. Trigger the 'Initiative Sync' workflow via workflow_dispatch.")
+
+
+if __name__ == "__main__":
+    main()

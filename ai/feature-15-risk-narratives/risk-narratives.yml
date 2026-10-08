@@ -1,0 +1,25 @@
+name: Risk Narratives
+on:
+  schedule:
+    - cron: "15 7 * * 1"
+  workflow_dispatch: {}
+jobs:
+  narratives:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install anthropic
+      - name: Generate risk narratives
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python ai/feature-15-risk-narratives/risk-narratives.py
+      - name: Commit changes
+        run: |
+          git config user.name "program-hub-bot"
+          git config user.email "program-hub-bot@users.noreply.github.com"
+          git add program/PROGRAM-RISKS.md
+          git diff --cached --quiet || git commit -m "chore: add PM digest to program risks"
+          git push

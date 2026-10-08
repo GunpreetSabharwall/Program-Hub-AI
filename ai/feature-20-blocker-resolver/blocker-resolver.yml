@@ -1,0 +1,37 @@
+name: Blocker Resolver
+on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+      issue_number:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repository (owner/repo)"
+        required: true
+        type: string
+      issue_number:
+        description: "Issue number"
+        required: true
+        type: string
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install anthropic requests
+      - name: Run blocker resolver
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python ai/feature-20-blocker-resolver/blocker-resolver.py \
+            "${{ inputs.repo }}" \
+            "${{ inputs.issue_number }}"

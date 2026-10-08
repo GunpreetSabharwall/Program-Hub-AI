@@ -1,0 +1,42 @@
+name: ADR Lint
+on:
+  pull_request:
+    paths:
+      - "initiatives/**/config.yml"
+      - "initiatives/**/pods/**/README.md"
+jobs:
+  adr-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check DECISION-LOG updated with architecture changes
+        run: |
+          # Get list of changed files in this PR
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Determine which initiatives have architecture file changes
+          INITIATIVES_CHANGED=$(echo "$CHANGED" | grep -oP 'initiatives/[^/]+' | sort -u || true)
+
+          if [ -z "$INITIATIVES_CHANGED" ]; then
+            echo "No initiative architecture files changed."
+            exit 0
+          fi
+
+          FAILED=0
+          for INIT_DIR in $INITIATIVES_CHANGED; do
+            SLUG=$(basename "$INIT_DIR")
+            DECISION_LOG="$INIT_DIR/DECISION-LOG.md"
+
+            # Check if DECISION-LOG.md was also modified in this PR
+            if echo "$CHANGED" | grep -q "$DECISION_LOG"; then
+              echo "OK: $SLUG — DECISION-LOG.md updated in this PR."
+            else
+              echo "FAIL: $SLUG — architecture files changed but DECISION-LOG.md was not updated."
+              echo "  Please add an ADR entry to $DECISION_LOG explaining the architectural change."
+              FAILED=1
+            fi
+          done
+
+          exit $FAILED

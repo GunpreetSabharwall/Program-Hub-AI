@@ -1,0 +1,19 @@
+name: Example Initiative
+slug: example-initiative
+source_repo: octocat/example-app
+source_repo_url: https://github.com/octocat/example-app
+owner: "@example-owner"
+status: active
+week_start: 2026-06-18
+duration_weeks: 8
+showcase_date: 2026-08-13
+github_project_id: ""
+labels:
+  blocked: blocked
+  dependency: dependency
+  adr: adr-required
+sync_cadence: weekly
+pods:
+  - slug: pod1-example
+    label: pod1-example
+    name: Example Pod

@@ -1,0 +1,78 @@
+name: Risk Flag
+# NOTE: This workflow is a template. Issue label events fire in the repository
+# where the issue lives (the source repo), not in Program Hub. To use this
+# workflow, copy it to each source repository's .github/workflows/ directory
+# and adjust the PROGRAM_HUB_REPO and INITIATIVE_SLUG variables.
+on:
+  issues:
+    types: [labeled]
+env:
+  PROGRAM_HUB_REPO: GunpreetSabharwall/Program-Hub-AI
+  INITIATIVE_SLUG: example-initiative
+jobs:
+  flag-risk:
+    if: github.event.label.name == 'blocked' || github.event.label.name == 'dependency'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PROGRAM_HUB_REPO }}
+          token: ${{ secrets.OCTO_PAT }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml requests
+      - name: Append risk register row
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+        run: |
+          python scripts/append-risk-register.py \
+            ${{ env.INITIATIVE_SLUG }} \
+            ${{ github.event.issue.number }} \
+            ${{ github.event.label.name }}
+      - name: Flag project board risk
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+        run: |
+          python scripts/flag-project-risk.py \
+            ${{ github.repository }} \
+            ${{ github.event.issue.number }} \
+            ${{ github.event.label.name }}
+      - name: Run blocker resolver (blocked only)
+        if: github.event.label.name == 'blocked'
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python ai/feature-20-blocker-resolver/blocker-resolver.py \
+            ${{ github.repository }} \
+            ${{ github.event.issue.number }}
+      - name: Post comment on issue
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+        run: |
+          python - <<'EOF'
+          import os, requests
+          token = os.environ["OCTO_PAT"]
+          repo = "${{ github.repository }}"
+          issue_number = ${{ github.event.issue.number }}
+          label = "${{ github.event.label.name }}"
+          hub_url = "https://github.com/${{ env.PROGRAM_HUB_REPO }}/blob/main/initiatives/${{ env.INITIATIVE_SLUG }}/RISK-REGISTER.md"
+          body = (
+              f":triangular_flag_on_post: This issue has been flagged as **{label}** "
+              f"and added to the [Program Hub risk register]({hub_url})."
+          )
+          resp = requests.post(
+              f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments",
+              headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json"},
+              json={"body": body},
+          )
+          resp.raise_for_status()
+          EOF
+      - name: Commit changes
+        run: |
+          git config user.name "program-hub-bot"
+          git config user.email "program-hub-bot@users.noreply.github.com"
+          git add initiatives/${{ env.INITIATIVE_SLUG }}/RISK-REGISTER.md
+          git diff --cached --quiet || git commit -m "chore: flag risk from ${{ github.repository }}#${{ github.event.issue.number }}"
+          git push
