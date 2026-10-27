@@ -115,3 +115,25 @@ def test_dashboard_script_offline(tmp_path, monkeypatch):
     assert "delivery looks green, but value does not" in text
     # The example initiative has no aev block, so it gets no value row.
     assert "| Example Initiative | ⚪" not in text
+
+
+def test_dashboard_survives_an_unreachable_repo(tmp_path, monkeypatch):
+    import requests
+    dash = load_script("scripts/update-program-dashboard.py", "dashboard2")
+    (tmp_path / "initiatives").symlink_to(ROOT / "initiatives")
+    (tmp_path / "program").mkdir()
+    monkeypatch.setattr(dash, "ROOT", tmp_path)
+
+    def search(token, q):
+        if "octocat/example-app" in q:
+            raise requests.HTTPError("422 Client Error")
+        return 0 if "label:" in q else 14
+    monkeypatch.setattr(dash, "gh_search_count", search)
+    monkeypatch.setenv("GITHUB_TOKEN", "test")
+    monkeypatch.setattr(sys, "argv", ["x", "--aev-json",
+                                      f"lakeshore-supplier-portal={DEMO / 'aev-after-revert.json'}"])
+    dash.main()
+    text = (tmp_path / "program" / "PROGRAM-DASHBOARD.md").read_text()
+    assert "| ? | ? | ⚠️ Unknown |" in text
+    assert "could not read `octocat/example-app`" in text
+    assert "| 14 | 0 | 🟢 Green | 🟡 Amber | 2026-12-22 |" in text

@@ -82,13 +82,19 @@ def main() -> None:
         slug = cfg["slug"]
 
         print(f"Querying {repo}...")
-        open_count = gh_search_count(token, f"repo:{repo} is:issue is:open")
-        blocked_count = gh_search_count(token, f"repo:{repo} is:issue is:open label:{blocked_label}")
+        try:
+            open_count = gh_search_count(token, f"repo:{repo} is:issue is:open")
+            blocked_count = gh_search_count(token, f"repo:{repo} is:issue is:open label:{blocked_label}")
+        except requests.RequestException as exc:
+            # Fail loud, but do not let one unreachable repo stop the whole dashboard.
+            print(f"::warning::Could not query {repo}: {exc}")
+            open_count = blocked_count = "?"
+            attention.append(f"- **{cfg['name']}**: could not read `{repo}` from GitHub ({exc.__class__.__name__}); check `source_repo` in its config.")
 
         week_start = cfg.get("week_start", "")
         duration = cfg.get("duration_weeks", 8)
         current_week = week_number(str(week_start)) if week_start else "?"
-        health = health_signal(blocked_count)
+        health = health_signal(blocked_count) if blocked_count != "?" else "⚠️ Unknown"
         showcase = cfg.get("showcase_date", "TBD")
 
         try:
@@ -111,7 +117,7 @@ def main() -> None:
             "value": aev_value.value_health(aev_results) if aev_results else "—",
         })
 
-        if blocked_count > 0:
+        if blocked_count != "?" and blocked_count > 0:
             attention.append(f"- **{cfg['name']}**: {blocked_count} open blocker(s) — see [risk register](../initiatives/{slug}/RISK-REGISTER.md)")
         if aev_results:
             for item in aev_value.attention_items(cfg, aev_results, delivery_health=health):
