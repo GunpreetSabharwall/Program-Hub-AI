@@ -2,17 +2,27 @@
 
 # Program Dashboard
 
-**As of:** 2026-06-25
+**As of:** 2026-10-27
 
 ## Initiative Health
 
-| Initiative | Owner | Week | Open Issues | Blockers | Health | Showcase Date |
-|------------|-------|------|-------------|----------|--------|---------------|
-| Example Initiative | @example-owner | 1 / 8 | 12 | 0 | 🟢 Green | 2026-08-13 |
+| Initiative | Owner | Week | Open Issues | Blockers | Delivery Health | Value Health | Showcase Date |
+|------------|-------|------|-------------|----------|-----------------|--------------|---------------|
+| Example Initiative | @example-owner | 19 / 8 | ? | ? | ⚠️ Unknown | — | 2026-08-13 |
+| Lakeshore Supplier Quality Portal | @GunpreetSabharwall | 5 / 12 | ? | ? | ⚠️ Unknown | — | 2026-12-22 |
+
+## Value (Agentic Earned Value)
+
+From each initiative's `.aev/aev.json`, written by [AEV](https://github.com/GunpreetSabharwall/agentic-earned-value). Delivery health counts blockers; value health asks what the work earned for what it cost.
+
+| Initiative | Value Health | CPI | SPI | Rework | Forecast (EAC) / Budget | Agent PRs | AEV as of |
+|------------|--------------|-----|-----|--------|-------------------------|-----------|-----------|
+| Lakeshore Supplier Quality Portal | ⚪ Not set up | | | | | | |
 
 ## PM Attention Required
 
-None at this time.
+- **Example Initiative**: could not read `octocat/example-app` from GitHub (HTTPError); check `source_repo` in its config.
+- **Lakeshore Supplier Quality Portal**: could not read `GunpreetSabharwall/lakeshore-supplier-portal-demo` from GitHub (HTTPError); check `source_repo` in its config.
 
 ---
 <!-- PM: add cross-initiative narrative here — preserved on regeneration -->
