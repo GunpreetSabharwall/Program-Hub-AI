@@ -78,13 +78,13 @@ def test_dashboard_rows_and_value_page():
                                      {"cfg": {"name": "Other"}, "results": None}])
     text = "\n".join(rows)
     assert "| Lakeshore Supplier Quality Portal | 🟡 Amber | 0.96 | 0.88 | 15.9% | $249,962 / $240,000 | 64.4% | 2026-11-10 |" in text
-    assert "| Other | ⚪ Not set up |" in text
+    assert "| Other | ⚪ No results yet |" in text
 
     page = aev_value.render_value_md(CFG, results())
     assert "| Integrations | Agent-authored | 2 | $18,000 | $30,000 | 0.60 |" in page
     assert "| CPI (value per $1 spent) | 1.45 | 0.96 |" in page
     assert "lakeshore-supplier-portal-demo/issues/22) | Post nonconformance reports (NCR) to ERP | $8,000 | PR #66 reverted |" in page
-    assert "AEV is not set up" in aev_value.render_value_md(CFG, None)
+    assert "No AEV results yet" in aev_value.render_value_md(CFG, None)
 
 
 def test_briefing_facts_and_template():

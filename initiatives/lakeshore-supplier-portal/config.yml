@@ -23,7 +23,16 @@ pods:
   - slug: integrations
     label: pod-integrations
     name: Integrations
-# Value signal (Feature 22): read AEV results from the source repo.
+# Value signal (Feature 22). Program Hub runs AEV on source_repo (hub mode):
+# plan dates come from week_start / duration_weeks, teams from pods above, and
+# the cost files live in aev/ next to this file. Results land in aev/ too.
 aev:
   enabled: true
-  results_path: .aev/aev.json
+  mode: hub
+  budget_at_completion: 240000
+  value_per_point: 2000            # 120 points of work in total
+  hourly_rate: 100
+  stabilization_window_days: 14
+  agent_accounts:
+    - coding-agent
+  agent_label: aev-agent

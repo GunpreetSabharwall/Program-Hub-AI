@@ -2,4 +2,4 @@
 
 # Value — Lakeshore Supplier Quality Portal
 
-AEV is not set up for this initiative yet. Add the AEV GitHub Action to `GunpreetSabharwall/lakeshore-supplier-portal-demo` (https://github.com/GunpreetSabharwall/agentic-earned-value); this page fills in after its first run.
+No AEV results yet. Program Hub runs AEV on `GunpreetSabharwall/lakeshore-supplier-portal-demo` with `scripts/run_aev.py` (see docs/REPO-REQUIREMENTS.md for what the repo needs); this page fills in after the first run.

@@ -6,9 +6,10 @@ Program Hub reports *delivery* health (issues, blockers, risks). AEV
 *value*: what the work earned for what it cost, including agent spend,
 human review of agent work, and work taken back when it did not stick.
 
-The two stay separate products. They meet in one file: AEV writes
-`.aev/aev.json` (schema "aev-results/1") into the initiative's source repo,
-and this module reads it to:
+The two stay separate products. They meet in one file, `aev.json` (schema
+"aev-results/1"). In the default "hub" mode Program Hub runs AEV on each
+initiative's source repo (scripts/run_aev.py) and AEV writes its results into
+initiatives/<slug>/aev/. This module reads them to:
 
 * add a Value Health column and a value section to PROGRAM-DASHBOARD.md
 * write initiatives/<slug>/VALUE.md, broken down by this initiative's pods
@@ -16,16 +17,25 @@ and this module reads it to:
 
 Run on its own to write every VALUE.md:
 
-    python scripts/aev_value.py                       # reads aev.json from each source repo
+    python scripts/aev_value.py                       # read each initiative's AEV results
     python scripts/aev_value.py --aev-json SLUG=PATH  # read a local file instead (offline)
 
 Turn it on for an initiative by adding an `aev:` block to its config.yml
-(initiatives without one are left alone). The defaults are shown:
+(initiatives without one are left alone):
 
     aev:
       enabled: true
-      results_path: .aev/aev.json   # path inside source_repo
-      results_file: ""              # local file, relative to this repo; used instead of GitHub
+      mode: hub          # hub (default): Program Hub runs AEV on source_repo, results in
+                         #   initiatives/<slug>/aev/aev.json
+                         # repo: AEV runs inside source_repo; read its results_path there
+      results_path: .aev/aev.json   # repo mode only: path inside source_repo
+      results_file: ""              # any mode: a local file to read instead
+      # hub mode only, the AEV settings (see scripts/run_aev.py):
+      budget_at_completion: 240000
+      value_per_point: 2000
+      hourly_rate: 100
+
+What a source repo needs is in docs/REPO-REQUIREMENTS.md.
 """
 
 from __future__ import annotations
@@ -73,11 +83,20 @@ def aev_settings(cfg: dict) -> dict:
         raw = {"enabled": False}
     else:
         raw = cfg.get("aev") or {}  # a bare "aev:" line turns it on with the defaults
+    mode = str(raw.get("mode") or "hub").strip().lower()
+    if mode not in ("hub", "repo"):
+        raise AevError(f"aev.mode must be 'hub' or 'repo', got {mode!r}.")
     return {
         "enabled": bool(raw.get("enabled", True)),
+        "mode": mode,
         "results_path": raw.get("results_path") or ".aev/aev.json",
         "results_file": raw.get("results_file") or "",
     }
+
+
+def hub_folder(cfg: dict) -> Path:
+    """Where hub mode keeps an initiative's AEV inputs (cost files) and outputs."""
+    return ROOT / "initiatives" / cfg["slug"] / "aev"
 
 
 def parse_results(text: str, source: str) -> dict:
@@ -126,6 +145,11 @@ def load_results(cfg: dict, token: Optional[str], override: Optional[str] = None
     if not settings["enabled"]:
         return None
     local = override or settings["results_file"]
+    if not local and settings["mode"] == "hub":
+        path = hub_folder(cfg) / "aev.json"
+        if not path.exists():
+            return None  # AEV has not run for this initiative yet
+        return parse_results(path.read_text(encoding="utf-8"), str(path))
     if local:
         path = Path(local)
         if not path.is_absolute():
@@ -239,7 +263,7 @@ def dashboard_rows(entries: List[dict]) -> List[str]:
     for e in entries:
         cfg, r = e["cfg"], e["results"]
         if r is None:
-            lines.append(f"| {cfg['name']} | ⚪ Not set up | | | | | | |")
+            lines.append(f"| {cfg['name']} | ⚪ No results yet | | | | | | |")
             continue
         s = symbol_of(r)
         sm, ind, act = r["summary"], r["indicators"], r["activity"]
@@ -264,8 +288,9 @@ def render_value_md(cfg: dict, results: Optional[dict]) -> str:
     ]
     if results is None:
         lines += [
-            "AEV is not set up for this initiative yet. Add the AEV GitHub Action to "
-            f"`{cfg['source_repo']}` ({AEV_URL}); this page fills in after its first run.",
+            "No AEV results yet. Program Hub runs AEV on "
+            f"`{cfg['source_repo']}` with `scripts/run_aev.py` (see docs/REPO-REQUIREMENTS.md for "
+            "what the repo needs); this page fills in after the first run.",
             "",
         ]
         return "\n".join(lines)
@@ -334,7 +359,9 @@ def render_value_md(cfg: dict, results: Optional[dict]) -> str:
     attention = attention_items(cfg, results)
     lines += ["## PM attention", ""]
     lines += [f"- {a}" for a in attention] or ["None at this time."]
-    lines += ["", f"Full report: `AEV-REPORT.md` in `{cfg['source_repo']}`. Initiative: [{slug}](config.yml).", ""]
+    where = ("[aev/AEV-REPORT.md](aev/AEV-REPORT.md)" if aev_settings(cfg)["mode"] == "hub"
+             else f"`AEV-REPORT.md` in `{cfg['source_repo']}`")
+    lines += ["", f"Full report: {where}. Initiative: [{slug}](config.yml).", ""]
     return "\n".join(lines)
 
 

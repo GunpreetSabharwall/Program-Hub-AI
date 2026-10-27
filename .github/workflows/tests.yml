@@ -7,8 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Get the AEV engine (for the end-to-end test)
+        uses: actions/checkout@v4
+        with:
+          repository: GunpreetSabharwall/agentic-earned-value
+          ref: ${{ vars.AEV_REF || 'v0.4.0' }}
+          path: .aev-engine
+        continue-on-error: true
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pyyaml requests pytest
       - run: python -m pytest -q tests
+        env:
+          AEV_HOME: .aev-engine

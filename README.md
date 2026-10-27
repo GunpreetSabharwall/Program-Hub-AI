@@ -46,9 +46,9 @@ Program Hub is a GitHub-native program governance framework that eliminates the 
 
 | # | Feature | Description |
 |---|---------|-------------|
-| 22 | Value signal | Reads each initiative's [AEV](https://github.com/GunpreetSabharwall/agentic-earned-value) results (`.aev/aev.json`); adds Value Health next to delivery health, writes VALUE.md with CPI by pod × human/agent work, flags when delivery and value disagree |
+| 22 | Value signal | Runs [AEV](https://github.com/GunpreetSabharwall/agentic-earned-value) on each initiative's source repo, from here; AEV writes `aev.json` back into the initiative folder. Adds Value Health next to delivery health, writes VALUE.md with CPI by pod × human/agent work, flags when delivery and value disagree |
 
-Delivery health tells you whether work is moving. Value health tells you whether it is paying back what it costs, once agent spend, human review of agent work, and rework are counted. Program Hub and AEV are separate products; they meet in one JSON file. See [Feature Matrix](docs/FEATURE-MATRIX.md#feature-22--value-signal-from-agentic-earned-value-no-ai-required).
+Delivery health tells you whether work is moving. Value health tells you whether it is paying back what it costs, once agent spend, human review of agent work, and rework are counted. Program Hub and AEV are separate products; both read source repos from outside, and AEV hands its results to Program Hub in one JSON file. What a source repo needs for each: [docs/REPO-REQUIREMENTS.md](docs/REPO-REQUIREMENTS.md). See [Feature Matrix](docs/FEATURE-MATRIX.md#feature-22--value-signal-from-agentic-earned-value-no-ai-required).
 
 ## How It Works
 

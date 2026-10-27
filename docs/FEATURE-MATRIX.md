@@ -43,13 +43,18 @@ Program Hub reports *delivery* (issues, blockers, risks). [Agentic Earned Value 
 
 | # | Feature | Script | Trigger | Implementation |
 |---|---------|--------|---------|----------------|
-| 22 | Value signal (AEV) | `scripts/aev_value.py` | Monday 08:00 UTC (program-dashboard.yml) | Opt-in per initiative with an `aev:` block in config.yml. Reads `.aev/aev.json` from the source repo (or a local file via `--aev-json SLUG=PATH`). Writes `initiatives/<slug>/VALUE.md`: classic EVM vs. AEV, AI activity vs. value, CPI by **pod** × authorship (AEV teams matched to pods by label), work taken back. Adds a **Value Health** column (from AEV's CPI: Green ≥ 1.00, Amber 0.90–0.99, Red < 0.90) and a value table to PROGRAM-DASHBOARD.md. PM attention items: delivery green but value not; a pod × authorship slice with CPI < 0.80 holding ≥ 5% of cost; Rework Rate > 10%; classic EVM CPI overstating AEV CPI by ≥ 0.30. |
+| 22 | Value signal (AEV) | `scripts/run_aev.py` + `scripts/aev_value.py` | Monday 08:00 UTC (program-dashboard.yml) | Opt-in per initiative with an `aev:` block in config.yml. **Hub mode (default):** `run_aev.py` runs AEV on the initiative's source repo from here (nothing installed there), with AEV's settings built from config.yml (budget, plan dates from `week_start`/`duration_weeks`, teams from `pods`) and cost files in `initiatives/<slug>/aev/`; AEV writes `aev/aev.json` and `aev/AEV-REPORT.md` back into the initiative folder. **Repo mode:** reads `.aev/aev.json` from a source repo that runs AEV itself. A local file can be given with `--aev-json SLUG=PATH`. Writes `initiatives/<slug>/VALUE.md`: classic EVM vs. AEV, AI activity vs. value, CPI by **pod** × authorship (AEV teams matched to pods by label), work taken back. Adds a **Value Health** column (from AEV's CPI: Green ≥ 1.00, Amber 0.90–0.99, Red < 0.90) and a value table to PROGRAM-DASHBOARD.md. PM attention items: delivery green but value not; a pod × authorship slice with CPI < 0.80 holding ≥ 5% of cost; Rework Rate > 10%; classic EVM CPI overstating AEV CPI by ≥ 0.30. |
 
 Config:
 
 ```yaml
 aev:
-  enabled: true
-  results_path: .aev/aev.json   # path inside source_repo
-  # results_file: demo/lakeshore/aev-after-revert.json   # local file instead of GitHub
+  mode: hub                     # hub (default) or repo
+  budget_at_completion: 240000  # hub mode: AEV settings
+  value_per_point: 2000
+  hourly_rate: 100
+  # results_path: .aev/aev.json # repo mode: path inside source_repo
+  # results_file: demo/lakeshore/aev-after-revert.json   # local file instead
 ```
+
+What a source repo must contain for Program Hub and for AEV: [REPO-REQUIREMENTS.md](REPO-REQUIREMENTS.md).
