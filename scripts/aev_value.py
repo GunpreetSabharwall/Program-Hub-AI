@@ -90,15 +90,29 @@ def parse_results(text: str, source: str) -> dict:
     return data
 
 
-def fetch_results(repo: str, path: str, token: Optional[str]) -> Optional[dict]:
-    """Read aev.json from a GitHub repo. Returns None if the file does not exist yet."""
+def github_get(url: str, token: Optional[str], params: Optional[dict] = None):
+    """GET from the GitHub API, retrying without the token if it is refused.
+
+    The built-in GITHUB_TOKEN of a workflow only reaches its own repository,
+    so reading another (public) repository with it returns 404. Public
+    repositories can be read without a token, so retry anonymously. For
+    private source repositories set the OCTO_PAT secret.
+    """
     import requests
 
     headers = {"Accept": "application/vnd.github+json"}
     if token:
-        headers["Authorization"] = f"token {token}"
+        resp = requests.get(url, headers={**headers, "Authorization": f"token {token}"},
+                            params=params, timeout=30)
+        if resp.status_code not in (401, 403, 404):
+            return resp
+    return requests.get(url, headers=headers, params=params, timeout=30)
+
+
+def fetch_results(repo: str, path: str, token: Optional[str]) -> Optional[dict]:
+    """Read aev.json from a GitHub repo. Returns None if the file does not exist yet."""
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
-    resp = requests.get(url, headers=headers, timeout=30)
+    resp = github_get(url, token)
     if resp.status_code == 404:
         return None
     resp.raise_for_status()

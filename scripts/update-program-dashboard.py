@@ -30,15 +30,15 @@ def gh_open_counts(token: str, repo: str, blocked_label: str) -> tuple:
     """(open issues, open blocked issues) in one repo.
 
     Uses the issues list rather than the search API: search refuses the
-    workflow's built-in GITHUB_TOKEN for other repositories, while listing the
-    issues of a public repo works with any token.
+    workflow's built-in GITHUB_TOKEN for other repositories, while the issues
+    of a public repo can always be listed (see aev_value.github_get).
     """
     open_count = blocked_count = 0
     url = f"https://api.github.com/repos/{repo}/issues"
     params = {"state": "open", "per_page": 100, "page": 1}
     blocked = blocked_label.lower()
     while True:
-        resp = requests.get(url, headers=gh_headers(token), params=params, timeout=30)
+        resp = aev_value.github_get(url, token, params=params)
         resp.raise_for_status()
         page = resp.json()
         for issue in page:

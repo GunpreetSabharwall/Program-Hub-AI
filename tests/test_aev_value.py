@@ -151,5 +151,25 @@ def test_open_counts_skip_pull_requests(monkeypatch):
             return self.data
 
     issues = [{"labels": [{"name": "Blocked"}]}, {"labels": []}, {"labels": [], "pull_request": {}}]
-    monkeypatch.setattr(dash.requests, "get", lambda *a, **k: Resp(issues))
+    monkeypatch.setattr(dash.aev_value, "github_get", lambda *a, **k: Resp(issues))
     assert dash.gh_open_counts("t", "o/r", "blocked") == (2, 1)
+
+
+def test_github_get_retries_without_a_refused_token(monkeypatch):
+    import requests
+    calls = []
+
+    class Resp:
+        def __init__(self, code):
+            self.status_code = code
+
+    def fake_get(url, headers=None, params=None, timeout=None):
+        calls.append("Authorization" in headers)
+        return Resp(404 if "Authorization" in headers else 200)
+
+    monkeypatch.setattr(requests, "get", fake_get)
+    assert aev_value.github_get("https://api.github.com/repos/o/r/issues", "tok").status_code == 200
+    assert calls == [True, False]
+    calls.clear()
+    assert aev_value.github_get("https://api.github.com/repos/o/r/issues", None).status_code == 200
+    assert calls == [False]
