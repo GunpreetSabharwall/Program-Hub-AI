@@ -41,9 +41,9 @@ Budget $240,000; planned value to date $120,000.
 
 | # | Title | Value | Reason |
 |---|-------|-------|--------|
-| [123](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/123) | Map ERP defect codes to portal categories | $6,000 | PR #148 reverted |
-| [124](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/124) | Sync PPAP approval status back to ERP | $6,000 | PR #165 reverted |
-| [125](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/125) | Post nonconformance reports (NCR) to ERP | $8,000 | PR #173 reverted |
+| [20](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/20) | Map ERP defect codes to portal categories | $6,000 | PR #39 reverted |
+| [21](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/21) | Sync PPAP approval status back to ERP | $6,000 | PR #57 reverted |
+| [22](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/22) | Post nonconformance reports (NCR) to ERP | $8,000 | PR #66 reverted |
 
 ## PM attention
 

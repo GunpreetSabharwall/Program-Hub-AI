@@ -6,7 +6,7 @@ made by `examples/lakeshore/build_dataset.py` in
 
 | File | What it is |
 |------|------------|
-| `aev-before-revert.json` | Week 6 (10 Nov 2026), before the agent PR for issue #125 is reverted on stage |
+| `aev-before-revert.json` | Week 6 (10 Nov 2026), before the agent PR for issue #22 (PR #66) is reverted on stage |
 | `aev-after-revert.json`  | The same week, after the revert |
 
 Use them to run Program Hub's value features offline:

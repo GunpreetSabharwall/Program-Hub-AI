@@ -83,7 +83,7 @@ def test_dashboard_rows_and_value_page():
     page = aev_value.render_value_md(CFG, results())
     assert "| Integrations | Agent-authored | 2 | $18,000 | $30,000 | 0.60 |" in page
     assert "| CPI (value per $1 spent) | 1.45 | 0.96 |" in page
-    assert "lakeshore-supplier-portal-demo/issues/125) | Post nonconformance reports (NCR) to ERP | $8,000 | PR #173 reverted |" in page
+    assert "lakeshore-supplier-portal-demo/issues/22) | Post nonconformance reports (NCR) to ERP | $8,000 | PR #66 reverted |" in page
     assert "AEV is not set up" in aev_value.render_value_md(CFG, None)
 
 

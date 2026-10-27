@@ -15,11 +15,11 @@ jobs:
       - name: Update value pages from AEV (Feature 22)
         continue-on-error: true   # a failure shows in the run; the dashboard still updates
         env:
-          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+          OCTO_PAT: ${{ secrets.OCTO_PAT || github.token }}
         run: python scripts/aev_value.py
       - name: Update program dashboard
         env:
-          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+          OCTO_PAT: ${{ secrets.OCTO_PAT || github.token }}
         run: python scripts/update-program-dashboard.py
       - name: Commit changes
         run: |
