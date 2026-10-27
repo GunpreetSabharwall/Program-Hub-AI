@@ -17,7 +17,7 @@ From each initiative's `.aev/aev.json`, written by [AEV](https://github.com/Gunp
 
 | Initiative | Value Health | CPI | SPI | Rework | Forecast (EAC) / Budget | Agent PRs | AEV as of |
 |------------|--------------|-----|-----|--------|-------------------------|-----------|-----------|
-| Lakeshore Supplier Quality Portal | ⚪ Not set up | | | | | | |
+| Lakeshore Supplier Quality Portal | ⚪ No results yet | | | | | | |
 
 ## PM Attention Required
 
