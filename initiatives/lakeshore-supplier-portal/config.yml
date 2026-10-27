@@ -1,0 +1,29 @@
+# Demo initiative for "Beyond AI Productivity: Rethinking Program Governance
+# with Agentic Earned Value" (AI Week Great Lakes, 10 Nov 2026).
+# Lakeshore Components is a fictional company.
+name: Lakeshore Supplier Quality Portal
+slug: lakeshore-supplier-portal
+source_repo: GunpreetSabharwall/lakeshore-supplier-portal-demo
+source_repo_url: https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo
+owner: "@GunpreetSabharwall"
+status: active
+week_start: 2026-09-29
+duration_weeks: 12
+showcase_date: 2026-12-22
+github_project_id: ""
+labels:
+  blocked: blocked
+  dependency: dependency
+  adr: adr-required
+sync_cadence: weekly
+pods:
+  - slug: portal
+    label: pod-portal
+    name: Portal
+  - slug: integrations
+    label: pod-integrations
+    name: Integrations
+# Value signal (Feature 22): read AEV results from the source repo.
+aev:
+  enabled: true
+  results_path: .aev/aev.json

@@ -7,6 +7,7 @@ Program Hub is a GitHub-native program governance framework that eliminates the 
 | Slug | Name | Owner | Status | Showcase Date |
 |------|------|-------|--------|---------------|
 | example-initiative | Example Initiative | @example-owner | active | 2026-08-13 |
+| lakeshore-supplier-portal | Lakeshore Supplier Quality Portal (demo, fictional) | @GunpreetSabharwall | active | 2026-12-22 |
 
 ## Feature Matrix
 
@@ -39,7 +40,15 @@ Program Hub is a GitHub-native program governance framework that eliminates the 
 | 18 | Stale issue coach | Weekly: posts 1-sentence nudge on issues stale >14 days |
 | 19 | Meeting-to-issues | Reads meeting notes; extracts and creates action-item issues in batch |
 | 20 | Blocker resolver | On blocked label: posts 2-3 resolution suggestions + owner recommendation |
-| 21 | PM briefing | Monday: posts 5-sentence Slack briefing from dashboard + risks + changelog |
+| 21 | PM briefing | Monday: posts 5-sentence Slack briefing from dashboard + risks + changelog + value |
+
+### Feature 22 — Value Signal (Agentic Earned Value)
+
+| # | Feature | Description |
+|---|---------|-------------|
+| 22 | Value signal | Reads each initiative's [AEV](https://github.com/GunpreetSabharwall/agentic-earned-value) results (`.aev/aev.json`); adds Value Health next to delivery health, writes VALUE.md with CPI by pod × human/agent work, flags when delivery and value disagree |
+
+Delivery health tells you whether work is moving. Value health tells you whether it is paying back what it costs, once agent spend, human review of agent work, and rework are counted. Program Hub and AEV are separate products; they meet in one JSON file. See [Feature Matrix](docs/FEATURE-MATRIX.md#feature-22--value-signal-from-agentic-earned-value-no-ai-required).
 
 ## How It Works
 

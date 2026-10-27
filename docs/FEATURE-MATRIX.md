@@ -35,4 +35,21 @@ Features are ordered simplest to most complex.
 | 18 | Stale issue coach | `ai/feature-18-stale-issue-coach/stale-issue-coach.py` | Monday 09:00 UTC | Scans all source repos for issues open >14 days with zero comments. For each stale issue, calls Claude for 1-sentence nudge comment. Posts comment via GitHub API. |
 | 19 | Meeting-to-issues | `ai/feature-19-meeting-to-issue/meeting-to-issue.py` | Manual CLI | Reads meeting notes file or stdin. Calls Claude to extract action items as JSON array [{title, description, assignee, initiative, is_blocked, is_dependency}]. Creates GitHub Issues in batch. |
 | 20 | Blocker resolver | `ai/feature-20-blocker-resolver/blocker-resolver.py` | risk-flag.yml (blocked label) or manual | Takes repo + issue number. Reads issue title/description. Fetches last 50 closed issues for context. Calls Claude for 2-3 resolution suggestions + recommended owner + similar resolved issue. Posts comment. |
-| 21 | PM briefing | `ai/feature-21-pm-briefing/pm-briefing.py` | Monday 08:30 UTC | Reads PROGRAM-DASHBOARD.md + PROGRAM-RISKS.md + latest changelog week section. Calls Claude for 5-sentence Slack briefing. Posts to Slack via SLACK_WEBHOOK_URL. |
+| 21 | PM briefing | `ai/feature-21-pm-briefing/pm-briefing.py` | Monday 08:30 UTC | Reads PROGRAM-DASHBOARD.md + PROGRAM-RISKS.md + latest changelog week section + exact AEV value figures (Feature 22). Calls Claude for 5-sentence Slack briefing that says plainly when delivery and value disagree. Posts to Slack via SLACK_WEBHOOK_URL. `--print` prints instead of posting; `--no-ai` (or an API failure) uses a fixed template built from the value attention items. |
+
+## Feature 22 — Value Signal from Agentic Earned Value (No AI Required)
+
+Program Hub reports *delivery* (issues, blockers, risks). [Agentic Earned Value (AEV)](https://github.com/GunpreetSabharwall/agentic-earned-value) reports *value*: what work earned for what it cost, counting agent spend, human review of agent work, and work taken back when it did not stick. They are separate products that meet in one file: AEV's GitHub Action writes `.aev/aev.json` (schema `aev-results/1`) into the initiative's source repo.
+
+| # | Feature | Script | Trigger | Implementation |
+|---|---------|--------|---------|----------------|
+| 22 | Value signal (AEV) | `scripts/aev_value.py` | Monday 08:00 UTC (program-dashboard.yml) | Opt-in per initiative with an `aev:` block in config.yml. Reads `.aev/aev.json` from the source repo (or a local file via `--aev-json SLUG=PATH`). Writes `initiatives/<slug>/VALUE.md`: classic EVM vs. AEV, AI activity vs. value, CPI by **pod** × authorship (AEV teams matched to pods by label), work taken back. Adds a **Value Health** column (from AEV's CPI: Green ≥ 1.00, Amber 0.90–0.99, Red < 0.90) and a value table to PROGRAM-DASHBOARD.md. PM attention items: delivery green but value not; a pod × authorship slice with CPI < 0.80 holding ≥ 5% of cost; Rework Rate > 10%; classic EVM CPI overstating AEV CPI by ≥ 0.30. |
+
+Config:
+
+```yaml
+aev:
+  enabled: true
+  results_path: .aev/aev.json   # path inside source_repo
+  # results_file: demo/lakeshore/aev-after-revert.json   # local file instead of GitHub
+```

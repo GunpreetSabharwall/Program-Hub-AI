@@ -12,6 +12,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml requests
+      - name: Update value pages from AEV (Feature 22)
+        continue-on-error: true   # a failure shows in the run; the dashboard still updates
+        env:
+          OCTO_PAT: ${{ secrets.OCTO_PAT }}
+        run: python scripts/aev_value.py
       - name: Update program dashboard
         env:
           OCTO_PAT: ${{ secrets.OCTO_PAT }}
@@ -21,5 +26,6 @@ jobs:
           git config user.name "program-hub-bot"
           git config user.email "program-hub-bot@users.noreply.github.com"
           git add program/PROGRAM-DASHBOARD.md
+          git add initiatives/*/VALUE.md 2>/dev/null || true
           git diff --cached --quiet || git commit -m "chore: update program dashboard"
           git push

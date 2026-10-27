@@ -31,6 +31,21 @@ Output only the 5 sentences.
 >
 > The program is in Green health overall with Example Initiative entering week 2 of 8 and 3 issues shipped last week. The auth API dependency (octocat/example-app#42) flagged on 2026-06-22 is the only active blocker and has been open 3 days without an update. No other initiatives are currently blocked or behind schedule. The platform team should be contacted today to confirm the auth contract timeline before it begins to threaten the 2026-08-13 showcase date. This week's priority action: schedule a 30-minute sync between @example-owner and the platform team lead to resolve the API contract.
 
+## Value figures (Feature 22)
+
+For initiatives with AEV turned on, the prompt also gets exact value figures (AEV CPI vs. classic EVM CPI, forecast, agent PR share, agent spend plus review, rework, CPI by pod × authorship) and is asked to say plainly when delivery and value disagree, and not to invent numbers.
+
+## Running it by hand
+
+```bash
+python ai/feature-21-pm-briefing/pm-briefing.py --print            # print instead of posting to Slack
+python ai/feature-21-pm-briefing/pm-briefing.py --print --no-ai    # fixed template, no API call
+python ai/feature-21-pm-briefing/pm-briefing.py --print \
+  --aev-json lakeshore-supplier-portal=demo/lakeshore/aev-after-revert.json
+```
+
+If the API call fails, the script prints the error and falls back to the fixed template, so a briefing is always produced.
+
 ## How to Enable
 
 1. Create a Slack incoming webhook at api.slack.com/apps → Incoming Webhooks.

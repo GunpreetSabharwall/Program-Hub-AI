@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
-"""Read all initiative configs; write PROGRAM-DASHBOARD.md."""
+"""Read all initiative configs; write PROGRAM-DASHBOARD.md.
 
+Delivery health comes from GitHub Issues (blockers). Value health comes from
+each initiative's AEV results (.aev/aev.json); see scripts/aev_value.py.
+
+    python scripts/update-program-dashboard.py
+    python scripts/update-program-dashboard.py --aev-json SLUG=PATH   # local AEV file
+"""
+
+import argparse
 import os
 import sys
 from datetime import datetime, timezone
@@ -8,6 +16,8 @@ from pathlib import Path
 
 import yaml
 import requests
+
+import aev_value
 
 ROOT = Path(__file__).parent.parent
 
@@ -44,6 +54,12 @@ def health_signal(blocked_count: int) -> str:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--aev-json", action="append", metavar="SLUG=PATH",
+                        help="Read this initiative's AEV results from a local file (repeatable).")
+    args = parser.parse_args()
+    aev_overrides = aev_value.parse_overrides(args.aev_json)
+
     token = os.environ.get("OCTO_PAT") or os.environ.get("GITHUB_TOKEN")
     if not token:
         sys.exit("Error: OCTO_PAT or GITHUB_TOKEN env var required.")
@@ -58,6 +74,7 @@ def main() -> None:
 
     rows = []
     attention = []
+    value_entries = []
 
     for cfg in configs:
         repo = cfg["source_repo"]
@@ -74,6 +91,14 @@ def main() -> None:
         health = health_signal(blocked_count)
         showcase = cfg.get("showcase_date", "TBD")
 
+        try:
+            aev_results = aev_value.load_results(cfg, token, aev_overrides.get(slug))
+        except Exception as exc:
+            aev_results = None
+            attention.append(f"- **{cfg['name']}**: AEV results could not be read ({exc})")
+        if aev_value.aev_settings(cfg)["enabled"]:
+            value_entries.append({"cfg": cfg, "results": aev_results})
+
         rows.append({
             "name": cfg["name"],
             "owner": cfg["owner"],
@@ -83,10 +108,14 @@ def main() -> None:
             "health": health,
             "showcase": showcase,
             "slug": slug,
+            "value": aev_value.value_health(aev_results) if aev_results else "—",
         })
 
         if blocked_count > 0:
             attention.append(f"- **{cfg['name']}**: {blocked_count} open blocker(s) — see [risk register](../initiatives/{slug}/RISK-REGISTER.md)")
+        if aev_results:
+            for item in aev_value.attention_items(cfg, aev_results, delivery_health=health):
+                attention.append(f"- {item} See [value](../initiatives/{slug}/VALUE.md).")
 
     # Preserve PM narrative
     dash_path = ROOT / "program" / "PROGRAM-DASHBOARD.md"
@@ -113,15 +142,18 @@ def main() -> None:
         "",
         "## Initiative Health",
         "",
-        "| Initiative | Owner | Week | Open Issues | Blockers | Health | Showcase Date |",
-        "|------------|-------|------|-------------|----------|--------|---------------|",
+        "| Initiative | Owner | Week | Open Issues | Blockers | Delivery Health | Value Health | Showcase Date |",
+        "|------------|-------|------|-------------|----------|-----------------|--------------|---------------|",
     ]
 
     for row in rows:
         lines.append(
             f"| {row['name']} | {row['owner']} | {row['week']} | "
-            f"{row['open']} | {row['blocked']} | {row['health']} | {row['showcase']} |"
+            f"{row['open']} | {row['blocked']} | {row['health']} | {row['value']} | {row['showcase']} |"
         )
+
+    if value_entries:
+        lines += [""] + aev_value.dashboard_rows(value_entries)[:-1]
 
     lines += ["", "## PM Attention Required", ""]
     if attention:
