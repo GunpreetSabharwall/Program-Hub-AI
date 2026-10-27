@@ -26,14 +26,30 @@ def gh_headers(token: str) -> dict:
     return {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
 
 
-def gh_search_count(token: str, query: str) -> int:
-    resp = requests.get(
-        "https://api.github.com/search/issues",
-        headers=gh_headers(token),
-        params={"q": query, "per_page": 1},
-    )
-    resp.raise_for_status()
-    return resp.json().get("total_count", 0)
+def gh_open_counts(token: str, repo: str, blocked_label: str) -> tuple:
+    """(open issues, open blocked issues) in one repo.
+
+    Uses the issues list rather than the search API: search refuses the
+    workflow's built-in GITHUB_TOKEN for other repositories, while listing the
+    issues of a public repo works with any token.
+    """
+    open_count = blocked_count = 0
+    url = f"https://api.github.com/repos/{repo}/issues"
+    params = {"state": "open", "per_page": 100, "page": 1}
+    blocked = blocked_label.lower()
+    while True:
+        resp = requests.get(url, headers=gh_headers(token), params=params, timeout=30)
+        resp.raise_for_status()
+        page = resp.json()
+        for issue in page:
+            if "pull_request" in issue:  # the issues list also returns PRs
+                continue
+            open_count += 1
+            if any(label["name"].lower() == blocked for label in issue.get("labels", [])):
+                blocked_count += 1
+        if len(page) < params["per_page"]:
+            return open_count, blocked_count
+        params["page"] += 1
 
 
 def week_number(week_start) -> tuple:
@@ -83,8 +99,7 @@ def main() -> None:
 
         print(f"Querying {repo}...")
         try:
-            open_count = gh_search_count(token, f"repo:{repo} is:issue is:open")
-            blocked_count = gh_search_count(token, f"repo:{repo} is:issue is:open label:{blocked_label}")
+            open_count, blocked_count = gh_open_counts(token, repo, blocked_label)
         except requests.RequestException as exc:
             # Fail loud, but do not let one unreachable repo stop the whole dashboard.
             print(f"::warning::Could not query {repo}: {exc}")

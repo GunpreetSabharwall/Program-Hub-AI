@@ -103,7 +103,7 @@ def test_dashboard_script_offline(tmp_path, monkeypatch):
     (tmp_path / "program").mkdir()
     monkeypatch.setattr(dash, "ROOT", tmp_path)
     monkeypatch.setattr(aev_value, "ROOT", ROOT)
-    monkeypatch.setattr(dash, "gh_search_count", lambda token, q: 0 if "label:" in q else 14)
+    monkeypatch.setattr(dash, "gh_open_counts", lambda token, repo, label: (14, 0))
     monkeypatch.setenv("GITHUB_TOKEN", "test")
     monkeypatch.setattr(sys, "argv", ["x", "--aev-json",
                                       f"lakeshore-supplier-portal={DEMO / 'aev-after-revert.json'}"])
@@ -124,11 +124,11 @@ def test_dashboard_survives_an_unreachable_repo(tmp_path, monkeypatch):
     (tmp_path / "program").mkdir()
     monkeypatch.setattr(dash, "ROOT", tmp_path)
 
-    def search(token, q):
-        if "octocat/example-app" in q:
-            raise requests.HTTPError("422 Client Error")
-        return 0 if "label:" in q else 14
-    monkeypatch.setattr(dash, "gh_search_count", search)
+    def counts(token, repo, label):
+        if repo == "octocat/example-app":
+            raise requests.HTTPError("404 Client Error")
+        return 14, 0
+    monkeypatch.setattr(dash, "gh_open_counts", counts)
     monkeypatch.setenv("GITHUB_TOKEN", "test")
     monkeypatch.setattr(sys, "argv", ["x", "--aev-json",
                                       f"lakeshore-supplier-portal={DEMO / 'aev-after-revert.json'}"])
@@ -137,3 +137,19 @@ def test_dashboard_survives_an_unreachable_repo(tmp_path, monkeypatch):
     assert "| ? | ? | ⚠️ Unknown |" in text
     assert "could not read `octocat/example-app`" in text
     assert "| 14 | 0 | 🟢 Green | 🟡 Amber | 2026-12-22 |" in text
+
+
+def test_open_counts_skip_pull_requests(monkeypatch):
+    dash = load_script("scripts/update-program-dashboard.py", "dashboard3")
+
+    class Resp:
+        def __init__(self, data):
+            self.data = data
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return self.data
+
+    issues = [{"labels": [{"name": "Blocked"}]}, {"labels": []}, {"labels": [], "pull_request": {}}]
+    monkeypatch.setattr(dash.requests, "get", lambda *a, **k: Resp(issues))
+    assert dash.gh_open_counts("t", "o/r", "blocked") == (2, 1)
