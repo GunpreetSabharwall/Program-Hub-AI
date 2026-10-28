@@ -118,9 +118,16 @@ def test_dashboard_script_offline(tmp_path, monkeypatch):
 
 
 def test_dashboard_survives_an_unreachable_repo(tmp_path, monkeypatch):
+    import shutil
     import requests
     dash = load_script("scripts/update-program-dashboard.py", "dashboard2")
-    (tmp_path / "initiatives").symlink_to(ROOT / "initiatives")
+    shutil.copytree(ROOT / "initiatives" / "lakeshore-supplier-portal",
+                    tmp_path / "initiatives" / "lakeshore-supplier-portal")
+    broken = tmp_path / "initiatives" / "example-initiative"
+    broken.mkdir()
+    (broken / "config.yml").write_text(
+        "name: Example Initiative\nslug: example-initiative\nsource_repo: octocat/example-app\n"
+        "owner: '@x'\nweek_start: 2026-06-18\nduration_weeks: 8\nlabels: {blocked: blocked}\n")
     (tmp_path / "program").mkdir()
     monkeypatch.setattr(dash, "ROOT", tmp_path)
 

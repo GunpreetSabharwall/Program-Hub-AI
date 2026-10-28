@@ -6,7 +6,6 @@ Program Hub is a GitHub-native program governance framework that eliminates the 
 
 | Slug | Name | Owner | Status | Showcase Date |
 |------|------|-------|--------|---------------|
-| example-initiative | Example Initiative | @example-owner | active | 2026-08-13 |
 | lakeshore-supplier-portal | Lakeshore Supplier Quality Portal (demo, fictional) | @GunpreetSabharwall | active | 2026-12-22 |
 | agent-gateway | Agent Gateway (demo, fictional) | @GunpreetSabharwall | active | 2026-11-30 |
 | cloud-modernization | Cloud Modernization (demo, fictional) | @GunpreetSabharwall | active | 2027-01-04 |

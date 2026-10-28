@@ -9,7 +9,12 @@ jobs:
     strategy:
       matrix:
         initiative:
-          - example-initiative
+          - lakeshore-supplier-portal
+          - agent-gateway
+          - cloud-modernization
+          - data-integration
+          - developer-productivity
+          - security-automation
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -4,7 +4,6 @@ All active and completed initiatives managed by Program Hub.
 
 | Slug | Name | Owner | Status | Source Repo | Showcase Date |
 |------|------|-------|--------|-------------|---------------|
-| example-initiative | Example Initiative | @example-owner | active | octocat/example-app | 2026-08-13 |
 | lakeshore-supplier-portal | Lakeshore Supplier Quality Portal (demo, fictional) | @GunpreetSabharwall | active | GunpreetSabharwall/lakeshore-supplier-portal-demo | 2026-12-22 |
 | agent-gateway | Agent Gateway (demo, fictional) | @GunpreetSabharwall | active | GunpreetSabharwall/initiative-agent-gateway | 2026-11-30 |
 | cloud-modernization | Cloud Modernization (demo, fictional) | @GunpreetSabharwall | active | GunpreetSabharwall/initiative-cloud-modernization | 2027-01-04 |
