@@ -12,7 +12,6 @@
 | Cloud Modernization | @GunpreetSabharwall | 7 / 16 | 11 | 0 | 🟢 Green | 🟡 Amber | 2027-01-04 |
 | Data Integration | @GunpreetSabharwall | 5 / 12 | 11 | 0 | 🟢 Green | 🔴 Red | 2026-12-21 |
 | Developer Productivity | @GunpreetSabharwall | 6 / 12 | 10 | 2 | 🟡 Amber | 🟢 Green | 2026-12-14 |
-| Example Initiative | @example-owner | 19 / 8 | ? | ? | ⚠️ Unknown | — | 2026-08-13 |
 | Lakeshore Supplier Quality Portal | @GunpreetSabharwall | 5 / 12 | 13 | 0 | 🟢 Green | 🟢 Green | 2026-12-22 |
 | Security Automation | @GunpreetSabharwall | 4 / 14 | 13 | 3 | 🔴 Red | 🟢 Green | 2027-01-11 |
 
@@ -41,7 +40,6 @@ From each initiative's `.aev/aev.json`, written by [AEV](https://github.com/Gunp
 - **Data Integration**: classic EVM says CPI 1.70; with agent cost, review and rework it is 0.74. Do not report the classic number. See [value](../initiatives/data-integration/VALUE.md).
 - **Developer Productivity**: 2 open blocker(s) — see [risk register](../initiatives/developer-productivity/RISK-REGISTER.md)
 - **Developer Productivity / CI**: agent-authored work has CPI 0.71 ($4,500 earned for $6,300 spent). See [value](../initiatives/developer-productivity/VALUE.md).
-- **Example Initiative**: could not read `octocat/example-app` from GitHub (HTTPError); check `source_repo` in its config.
 - **Lakeshore Supplier Quality Portal**: 10.2% of work marked done was taken back ($12,000 reverted or reopened). See [value](../initiatives/lakeshore-supplier-portal/VALUE.md).
 - **Lakeshore Supplier Quality Portal**: classic EVM says CPI 1.71; with agent cost, review and rework it is 1.28. Do not report the classic number. See [value](../initiatives/lakeshore-supplier-portal/VALUE.md).
 - **Security Automation**: 3 open blocker(s) — see [risk register](../initiatives/security-automation/RISK-REGISTER.md)
