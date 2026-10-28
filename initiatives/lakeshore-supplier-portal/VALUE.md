@@ -2,4 +2,51 @@
 
 # Value — Lakeshore Supplier Quality Portal
 
-No AEV results yet. Program Hub runs AEV on `GunpreetSabharwall/lakeshore-supplier-portal-demo` with `scripts/run_aev.py` (see docs/REPO-REQUIREMENTS.md for what the repo needs); this page fills in after the first run.
+**Value health:** 🟢 Green &nbsp;|&nbsp; **AEV as of:** 2026-10-28 &nbsp;|&nbsp; **Source:** `GunpreetSabharwall/lakeshore-supplier-portal-demo`
+
+> For every $1 spent, the project has earned $1.28 of value; it is under budget and ahead of schedule. 10.2% of the work that was marked done did not stick and was taken back.
+
+## Summary
+
+| Indicator | Classic EVM | AEV |
+|-----------|-------------|-----|
+| Earned value | $118,000 | $106,000 |
+| Actual cost | $69,040 | $82,710 |
+| CPI (value per $1 spent) | 1.71 | 1.28 |
+| SPI (schedule) | 1.42 | 1.28 |
+| Forecast total cost | $140,420 | $187,268 |
+
+Budget $240,000; planned value to date $82,857.
+
+## AI activity vs. value
+
+| Activity | | Value | |
+|----------|--|-------|--|
+| Merged PRs | 44 | Issues done that stuck | 16 |
+| Share by agents | 63.6% | Rework Rate | 10.2% |
+| Issues closed | 18 | Work taken back | $12,000 |
+| Agent spend | $3,670 | Agent spend + human review | $13,670 |
+
+## By pod and who did the work
+
+| Pod | Work | Items earning value | EV | AC | CPI |
+|-----|------|---------------------|----|----|-----|
+| Portal | Agent-authored | 8 | $40,000 | $17,250 | 2.32 |
+| Portal | Human-authored | 3 | $24,000 | $22,000 | 1.09 |
+| Integrations | Agent-authored | 2 | $18,000 | $17,260 | 1.04 |
+| Integrations | Human-authored | 3 | $24,000 | $23,200 | 1.03 |
+| No team | Not linked to an issue | 0 | $0 | $3,000 | 0.00 |
+
+## Work taken back
+
+| # | Title | Value | Reason |
+|---|-------|-------|--------|
+| [20](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/20) | Map ERP defect codes to portal categories | $6,000 | PR #39 reverted |
+| [21](https://github.com/GunpreetSabharwall/lakeshore-supplier-portal-demo/issues/21) | Sync PPAP approval status back to ERP | $6,000 | PR #57 reverted |
+
+## PM attention
+
+- **Lakeshore Supplier Quality Portal**: 10.2% of work marked done was taken back ($12,000 reverted or reopened).
+- **Lakeshore Supplier Quality Portal**: classic EVM says CPI 1.71; with agent cost, review and rework it is 1.28. Do not report the classic number.
+
+Full report: [aev/AEV-REPORT.md](aev/AEV-REPORT.md). Initiative: [lakeshore-supplier-portal](config.yml).

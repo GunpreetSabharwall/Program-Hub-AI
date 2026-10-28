@@ -2,14 +2,19 @@
 
 # Program Dashboard
 
-**As of:** 2026-10-27
+**As of:** 2026-10-28
 
 ## Initiative Health
 
 | Initiative | Owner | Week | Open Issues | Blockers | Delivery Health | Value Health | Showcase Date |
 |------------|-------|------|-------------|----------|-----------------|--------------|---------------|
+| Agent Gateway | @GunpreetSabharwall | 6 / 10 | 7 | 0 | 🟢 Green | 🟢 Green | 2026-11-30 |
+| Cloud Modernization | @GunpreetSabharwall | 7 / 16 | 11 | 0 | 🟢 Green | 🟡 Amber | 2027-01-04 |
+| Data Integration | @GunpreetSabharwall | 5 / 12 | 11 | 0 | 🟢 Green | 🔴 Red | 2026-12-21 |
+| Developer Productivity | @GunpreetSabharwall | 6 / 12 | 10 | 2 | 🟡 Amber | 🟢 Green | 2026-12-14 |
 | Example Initiative | @example-owner | 19 / 8 | ? | ? | ⚠️ Unknown | — | 2026-08-13 |
-| Lakeshore Supplier Quality Portal | @GunpreetSabharwall | 5 / 12 | ? | ? | ⚠️ Unknown | — | 2026-12-22 |
+| Lakeshore Supplier Quality Portal | @GunpreetSabharwall | 5 / 12 | 13 | 0 | 🟢 Green | 🟢 Green | 2026-12-22 |
+| Security Automation | @GunpreetSabharwall | 4 / 14 | 13 | 3 | 🔴 Red | 🟢 Green | 2027-01-11 |
 
 ## Value (Agentic Earned Value)
 
@@ -17,12 +22,29 @@ From each initiative's `.aev/aev.json`, written by [AEV](https://github.com/Gunp
 
 | Initiative | Value Health | CPI | SPI | Rework | Forecast (EAC) / Budget | Agent PRs | AEV as of |
 |------------|--------------|-----|-----|--------|-------------------------|-----------|-----------|
-| Lakeshore Supplier Quality Portal | ⚪ No results yet | | | | | | |
+| Agent Gateway | 🟢 Green | 1.32 | 1.30 | 0.0% | $136,698 / $180,000 | 84.6% | 2026-10-28 |
+| Cloud Modernization | 🟡 Amber | 0.98 | 1.28 | 4.6% | $314,136 / $307,500 | 66.7% | 2026-10-28 |
+| Data Integration | 🔴 Red | 0.74 | 1.10 | 22.4% | $260,828 / $194,000 | 83.3% | 2026-10-28 |
+| Developer Productivity | 🟢 Green | 1.07 | 1.05 | 0.0% | $127,346 / $136,500 | 47.1% | 2026-10-28 |
+| Lakeshore Supplier Quality Portal | 🟢 Green | 1.28 | 1.28 | 10.2% | $187,268 / $240,000 | 63.6% | 2026-10-28 |
+| Security Automation | 🟢 Green | 1.11 | 1.42 | 0.0% | $150,720 / $168,000 | 78.6% | 2026-10-28 |
 
 ## PM Attention Required
 
+- **Agent Gateway**: classic EVM says CPI 1.71; with agent cost, review and rework it is 1.32. Do not report the classic number. See [value](../initiatives/agent-gateway/VALUE.md).
+- **Cloud Modernization**: delivery looks green, but value does not: earning $0.98 for every $1 spent (AEV CPI 0.98). See [value](../initiatives/cloud-modernization/VALUE.md).
+- **Cloud Modernization**: classic EVM says CPI 1.41; with agent cost, review and rework it is 0.98. Do not report the classic number. See [value](../initiatives/cloud-modernization/VALUE.md).
+- **Data Integration**: delivery looks green, but value does not: earning $0.74 for every $1 spent (AEV CPI 0.74). See [value](../initiatives/data-integration/VALUE.md).
+- **Data Integration / ERP**: agent-authored work has CPI 0.63 ($30,000 earned for $47,745 spent). See [value](../initiatives/data-integration/VALUE.md).
+- **Data Integration / EDI**: agent-authored work has CPI 0.73 ($20,000 earned for $27,510 spent). See [value](../initiatives/data-integration/VALUE.md).
+- **Data Integration**: 22.4% of work marked done was taken back ($22,000 reverted or reopened). See [value](../initiatives/data-integration/VALUE.md).
+- **Data Integration**: classic EVM says CPI 1.70; with agent cost, review and rework it is 0.74. Do not report the classic number. See [value](../initiatives/data-integration/VALUE.md).
+- **Developer Productivity**: 2 open blocker(s) — see [risk register](../initiatives/developer-productivity/RISK-REGISTER.md)
+- **Developer Productivity / CI**: agent-authored work has CPI 0.71 ($4,500 earned for $6,300 spent). See [value](../initiatives/developer-productivity/VALUE.md).
 - **Example Initiative**: could not read `octocat/example-app` from GitHub (HTTPError); check `source_repo` in its config.
-- **Lakeshore Supplier Quality Portal**: could not read `GunpreetSabharwall/lakeshore-supplier-portal-demo` from GitHub (HTTPError); check `source_repo` in its config.
+- **Lakeshore Supplier Quality Portal**: 10.2% of work marked done was taken back ($12,000 reverted or reopened). See [value](../initiatives/lakeshore-supplier-portal/VALUE.md).
+- **Lakeshore Supplier Quality Portal**: classic EVM says CPI 1.71; with agent cost, review and rework it is 1.28. Do not report the classic number. See [value](../initiatives/lakeshore-supplier-portal/VALUE.md).
+- **Security Automation**: 3 open blocker(s) — see [risk register](../initiatives/security-automation/RISK-REGISTER.md)
 
 ---
 <!-- PM: add cross-initiative narrative here — preserved on regeneration -->
